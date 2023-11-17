@@ -1,0 +1,51 @@
+﻿<Window x:Class="DepartmentManagementApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:DepartmentManagementApp"
+        Title="Department Management" Height="450" Width="800">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="2*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Обновленный TreeView для отображения структуры департаментов и сотрудников -->
+        <TreeView Grid.Column="0" Name="TreeViewDepartments" SelectedItemChanged="TreeViewDepartments_SelectedItemChanged">
+            <TreeView.ItemTemplate>
+                <HierarchicalDataTemplate DataType="{x:Type local:Department}" ItemsSource="{Binding SubDepartments}">
+                    <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+                    <HierarchicalDataTemplate.ItemTemplate>
+                        <HierarchicalDataTemplate DataType="{x:Type local:Department}" ItemsSource="{Binding SubDepartments}">
+                            <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+                            <HierarchicalDataTemplate.ItemTemplate>
+                                <HierarchicalDataTemplate DataType="{x:Type local:Employee}" ItemsSource="{Binding Employees}">
+                                    <TextBlock Text="{Binding Name}" Foreground="Gray"/>
+                                </HierarchicalDataTemplate>
+                            </HierarchicalDataTemplate.ItemTemplate>
+                        </HierarchicalDataTemplate>
+                    </HierarchicalDataTemplate.ItemTemplate>
+                </HierarchicalDataTemplate>
+            </TreeView.ItemTemplate>
+        </TreeView>
+
+
+
+        <!-- Панель управления для добавления департаментов и сотрудников -->
+        <StackPanel Grid.Column="1" Margin="10">
+            <!-- Поле ввода и кнопка для добавления департамента -->
+            <TextBox Name="DepartmentNameInput" Margin="0,0,0,10" 
+                     GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus"
+                     Text=""/>
+            <Button Content="Добавить департамент" Margin="0,0,0,5" Click="AddDepartment_Click"/>
+
+            <!-- Поле ввода и кнопка для добавления сотрудника -->
+            <TextBox Name="EmployeeNameInput" Margin="0,0,0,10" 
+                     GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus"
+                     Text=""/>
+            <Button Content="Добавить сотрудника" Margin="0,0,0,5" Click="AddEmployee_Click"/>
+
+            <!-- Здесь вы можете добавить дополнительные элементы управления, если необходимо -->
+        </StackPanel>
+    </Grid>
+</Window>
