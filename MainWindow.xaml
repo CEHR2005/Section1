@@ -11,23 +11,17 @@
         </Grid.ColumnDefinitions>
 
         <!-- Обновленный TreeView для отображения структуры департаментов и сотрудников -->
-        <TreeView Grid.Column="0" Name="TreeViewDepartments" SelectedItemChanged="TreeViewDepartments_SelectedItemChanged">
-            <TreeView.ItemTemplate>
-                <HierarchicalDataTemplate DataType="{x:Type local:Department}" ItemsSource="{Binding SubDepartments}">
+        <TreeView Name="TreeViewDepartments" ItemsSource="{Binding}" SelectedItemChanged="TreeViewDepartments_SelectedItemChanged">
+            <TreeView.Resources>
+                <HierarchicalDataTemplate DataType="{x:Type local:Department}" ItemsSource="{Binding Items}">
                     <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
-                    <HierarchicalDataTemplate.ItemTemplate>
-                        <HierarchicalDataTemplate DataType="{x:Type local:Department}" ItemsSource="{Binding SubDepartments}">
-                            <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
-                            <HierarchicalDataTemplate.ItemTemplate>
-                                <HierarchicalDataTemplate DataType="{x:Type local:Employee}" ItemsSource="{Binding Employees}">
-                                    <TextBlock Text="{Binding Name}" Foreground="Gray"/>
-                                </HierarchicalDataTemplate>
-                            </HierarchicalDataTemplate.ItemTemplate>
-                        </HierarchicalDataTemplate>
-                    </HierarchicalDataTemplate.ItemTemplate>
                 </HierarchicalDataTemplate>
-            </TreeView.ItemTemplate>
+                <DataTemplate DataType="{x:Type local:Employee}">
+                    <TextBlock Text="{Binding Name}" Foreground="Gray"/>
+                </DataTemplate>
+            </TreeView.Resources>
         </TreeView>
+
 
 
 

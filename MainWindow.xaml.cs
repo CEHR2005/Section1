@@ -64,6 +64,17 @@ namespace DepartmentManagementApp
             }
             return total;
         }
+
+        public IEnumerable<object> Items
+        {
+            get
+            {
+                foreach (var subDept in SubDepartments)
+                    yield return subDept;
+                foreach (var emp in Employees)
+                    yield return emp;
+            }
+        }
         public void PrintStructure(int level = 0)
         {
             Debug.WriteLine(new string(' ', level * 2) + Name + " - " + ManagerName);
