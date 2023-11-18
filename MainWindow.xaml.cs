@@ -4,9 +4,12 @@ using System.Collections.Generic;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System;
+using System.Collections;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Windows.Input;
-
+using Newtonsoft.Json;
 namespace DepartmentManagementApp
 {
     public class Department
@@ -63,12 +66,7 @@ namespace DepartmentManagementApp
         {
             get
             {
-                int total = Employees.Count;
-                foreach (var subDept in SubDepartments)
-                {
-                    total += subDept.EmployeeCount;
-                }
-                return total;
+                return Employees.Count + SubDepartments.Sum(subDept => subDept.EmployeeCount);
             }
         }
 
@@ -109,19 +107,19 @@ namespace DepartmentManagementApp
     }
     public partial class MainWindow : Window
     {
-        private Department company;
-        private object selectedItem;
+        private Department _company = null!;
+        private object _selectedItem = null!;
         public MainWindow()
         {
             InitializeComponent();
             InitializeCompanyStructure();
-            company.PrintStructure();
+            _company?.PrintStructure();
         }
 
         private void InitializeCompanyStructure()
         {
             // Initializing the root department (company)
-            company = new Department("Head Office", "Chief Executive Officer");
+            _company = new Department("Head Office", "Chief Executive Officer");
 
             // Level 2: Main Departments
             var itDepartment = new Department("IT Department", "John Smith");
@@ -141,21 +139,21 @@ namespace DepartmentManagementApp
             var trainingAndDevelopmentDepartment = new Department("Training and Development Department", "Chloe Robinson");
 
             // Adding these departments to the company
-            company.AddSubDepartment(itDepartment);
-            company.AddSubDepartment(hrDepartment);
-            company.AddSubDepartment(financeDepartment);
-            company.AddSubDepartment(marketingDepartment);
-            company.AddSubDepartment(salesDepartment);
-            company.AddSubDepartment(rndDepartment);
-            company.AddSubDepartment(customerServiceDepartment);
-            company.AddSubDepartment(legalDepartment);
-            company.AddSubDepartment(operationsDepartment);
-            company.AddSubDepartment(productionDepartment);
-            company.AddSubDepartment(supplyChainDepartment);
-            company.AddSubDepartment(qualityAssuranceDepartment);
-            company.AddSubDepartment(corporateStrategyDepartment);
-            company.AddSubDepartment(informationSecurityDepartment);
-            company.AddSubDepartment(trainingAndDevelopmentDepartment);
+            _company.AddSubDepartment(itDepartment);
+            _company.AddSubDepartment(hrDepartment);
+            _company.AddSubDepartment(financeDepartment);
+            _company.AddSubDepartment(marketingDepartment);
+            _company.AddSubDepartment(salesDepartment);
+            _company.AddSubDepartment(rndDepartment);
+            _company.AddSubDepartment(customerServiceDepartment);
+            _company.AddSubDepartment(legalDepartment);
+            _company.AddSubDepartment(operationsDepartment);
+            _company.AddSubDepartment(productionDepartment);
+            _company.AddSubDepartment(supplyChainDepartment);
+            _company.AddSubDepartment(qualityAssuranceDepartment);
+            _company.AddSubDepartment(corporateStrategyDepartment);
+            _company.AddSubDepartment(informationSecurityDepartment);
+            _company.AddSubDepartment(trainingAndDevelopmentDepartment);
 
 
             // Level 3: Sub Departments
@@ -219,98 +217,82 @@ namespace DepartmentManagementApp
             trainingAndDevelopmentDepartment.AddSubDepartment(new Department("Leadership Development", "Kurt Wagner"));
 
             // Display in TreeView
-            TreeViewDepartments.ItemsSource = new ObservableCollection<Department> { company };
+            TreeViewDepartments.ItemsSource = new ObservableCollection<Department> { _company };
 
         }
         private void TreeViewDepartments_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            selectedItem = e.NewValue;
+            _selectedItem = e.NewValue;
         }
 
         private void TextBox_GotFocus(object sender, RoutedEventArgs e)
         {
-            TextBox textBox = sender as TextBox;
-            if (textBox != null && textBox.Text == "")
-            {
-                textBox.Text = "";
-                textBox.Foreground = Brushes.Black;
-            }
+            if ((sender as TextBox) is not { Text: "" } textBox) return;
+            textBox.Text = "";
+            textBox.Foreground = Brushes.Black;
         }
 
         private void TextBox_LostFocus(object sender, RoutedEventArgs e)
         {
-            TextBox textBox = sender as TextBox;
-            if (textBox != null && string.IsNullOrWhiteSpace(textBox.Text))
-            {
-                textBox.Text = "";
-                textBox.Foreground = Brushes.Gray;
-            }
+            if ((sender as TextBox) is not { } textBox || !string.IsNullOrWhiteSpace(textBox.Text)) return;
+            textBox.Text = "";
+            textBox.Foreground = Brushes.Gray;
         }
 
         private void AddDepartment_Click(object sender, RoutedEventArgs e)
         {
-            string departmentName = DepartmentNameInput.Text;
-            string managerName = "Manager Name";
+            var departmentName = DepartmentNameInput.Text;
+            const string managerName = "Manager Name";
 
-            if (!string.IsNullOrEmpty(departmentName))
+            if (string.IsNullOrEmpty(departmentName)) return;
+            var newDepartment = new Department(departmentName, managerName);
+
+            if (_selectedItem is Department department)
             {
-                var newDepartment = new Department(departmentName, managerName);
-
-                if (selectedItem is Department department)
-                {
-                    department.AddSubDepartment(newDepartment);
-                }
-                else
-                {
-                    company.AddSubDepartment(newDepartment);
-                }
-
-                UpdateTreeView();
+                department.AddSubDepartment(newDepartment);
             }
+            else
+            {
+                _company.AddSubDepartment(newDepartment);
+            }
+
+            UpdateTreeView();
         }
 
 
         private void AddEmployee_Click(object sender, RoutedEventArgs e)
         {
-            string employeeName = EmployeeNameInput.Text;
+            var employeeName = EmployeeNameInput.Text;
 
-            if (selectedItem is Department department && !string.IsNullOrEmpty(employeeName))
-            {
-                var newEmployee = new Employee(employeeName);
-                department.Employees.Add(newEmployee);
+            if (_selectedItem is not Department department || string.IsNullOrEmpty(employeeName)) return;
+            var newEmployee = new Employee(employeeName);
+            department.Employees.Add(newEmployee);
 
-                UpdateTreeView();
-            }
+            UpdateTreeView();
         }
 
-        private List<object> expandedItems;
+        private List<object> expandedItems = null!;
 
-        private void SaveExpandedItems(ItemCollection items)
+        private void SaveExpandedItems(IEnumerable items)
         {
             foreach (var item in items)
             {
-                var treeViewItem = TreeViewDepartments.ItemContainerGenerator.ContainerFromItem(item) as TreeViewItem;
-                if (treeViewItem != null && treeViewItem.IsExpanded)
-                {
-                    expandedItems.Add(item);
-                    SaveExpandedItems(treeViewItem.Items);
-                }
+                if (TreeViewDepartments.ItemContainerGenerator
+                        .ContainerFromItem(item) is not TreeViewItem { IsExpanded: true } treeViewItem) continue;
+                expandedItems.Add(item);
+                SaveExpandedItems(treeViewItem.Items);
             }
         }
 
-        private void RestoreExpandedItems(ItemCollection items)
+        private void RestoreExpandedItems(IEnumerable items)
         {
             foreach (var item in items)
             {
-                var treeViewItem = TreeViewDepartments.ItemContainerGenerator.ContainerFromItem(item) as TreeViewItem;
-                if (treeViewItem != null)
-                {
-                    if (expandedItems.Contains(item))
-                    {
-                        treeViewItem.IsExpanded = true;
-                        RestoreExpandedItems(treeViewItem.Items);
-                    }
-                }
+                if (TreeViewDepartments.ItemContainerGenerator.ContainerFromItem(item) is not TreeViewItem treeViewItem)
+                    continue;
+                if (!expandedItems.Contains(item)) continue;
+                treeViewItem.IsExpanded = true;
+                RestoreExpandedItems(treeViewItem.Items);
             }
         }
 
@@ -320,49 +302,47 @@ namespace DepartmentManagementApp
             SaveExpandedItems(TreeViewDepartments.Items);
 
             TreeViewDepartments.ItemsSource = null;
-            TreeViewDepartments.ItemsSource = new ObservableCollection<Department> { company };
+            TreeViewDepartments.ItemsSource = new ObservableCollection<Department> { _company };
 
             RestoreExpandedItems(TreeViewDepartments.Items);
         }
 
         private void DeleteDepartment_Click(object sender, RoutedEventArgs e)
         {
-                if (selectedItem is Employee employee)
+            switch (_selectedItem)
+            {
+                case Employee employee:
                 {
-                    var parentDepartment = FindParentDepartmentForEmployee(company, employee);
+                    var parentDepartment = FindParentDepartmentForEmployee(_company, employee);
                     if (parentDepartment is Department parent)
                     {
                         parent.RemoveEmployee(employee);
                         UpdateTreeView();
                     }
-                }
-                else if (selectedItem is Department department)
-                {
-                    if (department == company)
-                    {
-                        MessageBox.Show("You cannot delete the root department!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
-                    else
-                    {
-                        var parentDepartment = FindParentDepartment(company, department);
-                        parentDepartment.RemoveSubDepartment(department);
-                        department = null;
-                        UpdateTreeView();
-                    }
 
+                    break;
                 }
+                case Department department when department == _company:
+                    MessageBox.Show("You cannot delete the root department!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    break;
+                case Department department:
+                {
+                    var parentDepartment = FindParentDepartment(_company, department);
+                    parentDepartment.RemoveSubDepartment(department);
+                    department = null;
+                    UpdateTreeView();
+                    break;
+                }
+            }
         }
 
-        private object FindParentDepartmentForEmployee(Department department, Employee employee)
+        private static object FindParentDepartmentForEmployee(Department department, Employee employee)
         {
             foreach (var subDepartment in department.SubDepartments)
             {
-                foreach (var emp in subDepartment.Employees)
+                if (subDepartment.Employees.Any(emp => emp == employee))
                 {
-                    if (emp == employee)
-                    {
-                        return subDepartment;
-                    }
+                    return subDepartment;
                 }
                 var result = FindParentDepartmentForEmployee(subDepartment, employee);
                 if (result != null)
@@ -373,7 +353,7 @@ namespace DepartmentManagementApp
             return null;
         }
 
-        private Department FindParentDepartment(Department department, Department selectedDepartment1)
+        private static Department FindParentDepartment(Department department, Department selectedDepartment1)
         {
             foreach (var subDepartment in department.SubDepartments)
             {
@@ -395,21 +375,19 @@ namespace DepartmentManagementApp
 
         private void MoveItem_Click(object sender, RoutedEventArgs e)
         {
-            if (selectedItem == null)
+            if (_selectedItem == null)
             {
-                MessageBox.Show("Выберите элемент для переноса.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Chose item to move", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
-            TransferWindow transferWindow = new TransferWindow(company, selectedItem);
+            var transferWindow = new TransferWindow(_company, _selectedItem);
             var result = transferWindow.ShowDialog();
             Debug.WriteLine("Result: " + result);
-            if (result == true && transferWindow.SelectedTarget != null)
-            {
-                Debug.WriteLine("Selected target: " + transferWindow.SelectedTarget.Name);
-                PerformTransfer(selectedItem, transferWindow.SelectedTarget);
-                UpdateTreeView();
-            }
+            if (result != true) return;
+            Debug.WriteLine("Selected target: " + transferWindow.SelectedTarget.Name);
+            PerformTransfer(_selectedItem, transferWindow.SelectedTarget);
+            UpdateTreeView();
         }
 
 
@@ -417,20 +395,26 @@ namespace DepartmentManagementApp
         private void PerformTransfer(object itemToMove, Department targetDepartment)
         {
             Debug.WriteLine("Performing transfer of " + itemToMove + " to " + targetDepartment.Name);
-            if (itemToMove is Employee employee)
+            switch (itemToMove)
             {
-                Debug.WriteLine("Moving employee " + employee.Name);
-                if (FindParentDepartmentForEmployee(company, employee) is Department department)
+                case Employee employee:
                 {
-                    department?.MoveEmployee(employee, targetDepartment);
+                    Debug.WriteLine("Moving employee " + employee.Name);
+                    if (FindParentDepartmentForEmployee(_company, employee) is Department department)
+                    {
+                        department?.MoveEmployee(employee, targetDepartment);
 
+                    }
+
+                    break;
                 }
-            }
-            else if (itemToMove is Department department)
-            {
-                Debug.WriteLine("Moving department " + department.Name);
-                var currentParentDepartment = FindParentDepartment(company, department);
-                currentParentDepartment?.MoveSubDepartment(department, targetDepartment);
+                case Department department:
+                {
+                    Debug.WriteLine("Moving department " + department.Name);
+                    var currentParentDepartment = FindParentDepartment(_company, department);
+                    currentParentDepartment?.MoveSubDepartment(department, targetDepartment);
+                    break;
+                }
             }
         }
 
