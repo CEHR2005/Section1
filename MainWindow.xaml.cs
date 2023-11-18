@@ -59,14 +59,17 @@ namespace DepartmentManagementApp
             newDepartment.AddSubDepartment(subDepartment);
         }
 
-        public int TotalNumberOfEmployees()
+        public int EmployeeCount
         {
-            int total = Employees.Count;
-            foreach (var subDept in SubDepartments)
+            get
             {
-                total += subDept.TotalNumberOfEmployees();
+                int total = Employees.Count;
+                foreach (var subDept in SubDepartments)
+                {
+                    total += subDept.EmployeeCount;
+                }
+                return total;
             }
-            return total;
         }
 
         public IEnumerable<object> Items

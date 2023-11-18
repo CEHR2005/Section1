@@ -14,7 +14,12 @@
         <TreeView Name="TreeViewDepartments" ItemsSource="{Binding}" SelectedItemChanged="TreeViewDepartments_SelectedItemChanged">
             <TreeView.Resources>
                 <HierarchicalDataTemplate DataType="{x:Type local:Department}" ItemsSource="{Binding Items}">
-                    <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+                        <TextBlock Text=" (" FontWeight="Bold"/>
+                        <TextBlock Text="{Binding EmployeeCount}" FontWeight="Bold"/>
+                        <TextBlock Text=")" FontWeight="Bold"/>
+                    </StackPanel>
                 </HierarchicalDataTemplate>
                 <DataTemplate DataType="{x:Type local:Employee}">
                     <TextBlock Text="{Binding Name}" Foreground="Gray"/>
