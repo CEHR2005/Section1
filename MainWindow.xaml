@@ -31,13 +31,18 @@
             <TextBox Name="DepartmentNameInput" Margin="0,0,0,10" 
                      GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus"
                      Text=""/>
-            <Button Content="Добавить департамент" Margin="0,0,0,5" Click="AddDepartment_Click"/>
+            <Button Content="Add Department" Margin="0,0,0,5" Click="AddDepartment_Click"/>
 
             <!-- Поле ввода и кнопка для добавления сотрудника -->
             <TextBox Name="EmployeeNameInput" Margin="0,0,0,10" 
                      GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus"
                      Text=""/>
-            <Button Content="Добавить сотрудника" Margin="0,0,0,5" Click="AddEmployee_Click"/>
+            <Button Content="Add Employee" Margin="0,0,0,5" Click="AddEmployee_Click"/>
+
+
+            <Button Content="Delete" Margin="0,0,0,5" Click="DeleteDepartment_Click"/>
+
+            <Button Content="Перенести" Margin="0,0,0,5" Click="MoveItem_Click"/>
 
             <!-- Здесь вы можете добавить дополнительные элементы управления, если необходимо -->
         </StackPanel>
