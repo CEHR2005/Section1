@@ -10,7 +10,6 @@
             <ColumnDefinition Width="2*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- Обновленный TreeView для отображения структуры департаментов и сотрудников -->
         <TreeView Name="TreeViewDepartments" ItemsSource="{Binding}" SelectedItemChanged="TreeViewDepartments_SelectedItemChanged">
             <TreeView.Resources>
                 <HierarchicalDataTemplate DataType="{x:Type local:Department}" ItemsSource="{Binding Items}">
@@ -30,15 +29,19 @@
 
 
 
-        <!-- Панель управления для добавления департаментов и сотрудников -->
         <StackPanel Grid.Column="1" Margin="10">
-            <!-- Поле ввода и кнопка для добавления департамента -->
+            <Label Content="Department Name(required):" Margin="0,0,0,5"/>
             <TextBox Name="DepartmentNameInput" Margin="0,0,0,10" 
                      GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus"
                      Text=""/>
+
+            <Label Content="Manager Name (not required):" Margin="0,0,0,5"/>
+            <TextBox Name="ManagerNameInput" Margin="0,0,0,10" 
+                     GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus"
+                     Text=""/>
+
             <Button Content="Add Department" Margin="0,0,0,5" Click="AddDepartment_Click"/>
 
-            <!-- Поле ввода и кнопка для добавления сотрудника -->
             <TextBox Name="EmployeeNameInput" Margin="0,0,0,10" 
                      GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus"
                      Text=""/>
@@ -47,9 +50,8 @@
 
             <Button Content="Delete" Margin="0,0,0,5" Click="DeleteDepartment_Click"/>
 
-            <Button Content="Перенести" Margin="0,0,0,5" Click="MoveItem_Click"/>
+            <Button Content="Transfer" Margin="0,0,0,5" Click="MoveItem_Click"/>
 
-            <!-- Здесь вы можете добавить дополнительные элементы управления, если необходимо -->
         </StackPanel>
     </Grid>
 </Window>
